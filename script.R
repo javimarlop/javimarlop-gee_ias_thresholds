@@ -26,23 +26,33 @@ rmv_outl<-function(table){ # this must be done by each lc class!
  for(i in 3:32){
 	#print(i)
 	if(i!=28){
-		x<-sd(df[,i])
-		xneg<--1*x
-		#print(x)
-		df[abs(df[,i])>x,i]<-NA
+		for(j in 1:10){
+			x<-quantile(df[df$lc==j,i],c(0.01,0.99))
+			xmax<-x[2]
+			xmin<-x[1]
+			#xneg<--1*x
+			#print(x)
+			df[df$lc==j & df[,i]>xmax,i]<-NA
+			df[!is.na(df[,i]) & df$lc==j & df[,i]<xmin,i]<-NA
+	}
 	}
  }
  return(df)
 }
 
 s96df<-rmv_outl(df96sum)
+s01df<-rmv_outl(df01sum)
 
 
 df96sm<-melt(s96df, id=c('year','season','lc'),na.rm=T)
 df01sm<-melt(s01df, id=c('year','season','lc'),na.rm=T)
 
 s96plot <- ggplot(df96sm, aes(as.factor(lc), value)) + geom_boxplot(aes(colour = season)) + facet_wrap(vars(variable), scales = "free")
+ggsave('s96plot.png',s96plot,scale=2,width=16,height=8,uni='cm')
+
 
 s01plot <- ggplot(df01sm, aes(as.factor(lc), value)) + geom_boxplot(aes(colour = season)) + facet_wrap(vars(variable), scales = "free")
+ggsave('s01plot.png',s01plot,scale=2,width=16,height=8,uni='cm')
+
 
 
