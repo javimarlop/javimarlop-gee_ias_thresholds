@@ -107,27 +107,27 @@ table(dfs$lc[iTrees])
 library(MASS)
 library(ROCR)
 
-smp_size_raw <- floor(0.75 * nrow(dfs))
-train_ind_raw <- sample(nrow(dfs), size = smp_size_raw)
+smp_size <- floor(0.75 * nrow(dfs))
+train_ind <- sample(nrow(dfs), size = smp_size)
 
-train_raw.df <- dfs[train_ind_raw, ]
-test_raw.df <- dfs[-train_ind_raw, ]
+train.df <- dfs[train_ind, ]
+test.df <- dfs[-train_ind, ]
 
-#f <- paste(names(train_raw.df)[28], "~", paste(names(train_raw.df)[-c(1,2,28)], collapse=" + "))
-f <- paste("as.factor(train_raw.df$lc) ~ ", paste(names(train_raw.df)[-c(1,2,28)], collapse=" + "))
-wdbc_raw.lda <- lda(as.formula(paste(f)), data = train_raw.df)
+#f <- paste(names(train.df)[28], "~", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
+f <- paste("as.factor(train.df$lc) ~ ", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
+summer.lda <- lda(as.formula(paste(f)), data = train.df)
 
-wdbc_raw.lda.predict <- predict(wdbc_raw.lda, newdata = test_raw.df)
+summer.lda.predict <- predict(summer.lda, newdata = test.df)
 
-wdbc_raw.lda.predict$class
+summer.lda.predict$class
 
-table(wdbc_raw.lda.predict$class,test_raw.df$lc)
+table(summer.lda.predict$class,test.df$lc)
 
 
 # Get the posteriors as a dataframe.
-wdbc_raw.lda.predict.posteriors <- as.data.frame(wdbc_raw.lda.predict$posterior)
+summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
 # Evaluate the model
-pred <- prediction(wdbc_raw.lda.predict.posteriors[,2], test_raw.df$lc)
+pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc)
 roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
 auc.train <- performance(pred, measure = "auc")
 auc.train <- auc.train@y.values
