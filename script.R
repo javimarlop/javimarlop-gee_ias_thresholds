@@ -68,5 +68,71 @@ ggsave('w01plot.png',w01plot,scale=2,width=16,height=8,uni='cm')
 w09plot <- ggplot(df09wm, aes(as.factor(lc), value)) + geom_boxplot(aes(colour = season)) + facet_wrap(vars(variable), scales = "free")
 ggsave('w09plot.png',w09plot,scale=2,width=16,height=8,uni='cm')
 
+# summer thresholds
 
+dfs<-rbind(s96df,s01df,s09df)
+attach(dfs)
+
+iTrees<-
+##GCVI_max	>=1.5 &
+##GCVI_mean	>=1.25 &
+GCVI_min	>=0.98 & # very good predictor
+##MTI	>=1 &
+#NDBI_max	<=0 & # good predictor
+#NDBI_mean	<=0 &
+##NDBI_min	<=-0.1 &
+##NDVI_max	>=0.4 &
+##NDVI_mean	>=0.3 &
+##NDVI_min	>=0.25 &
+#NDWI_min	>=0 & # good predictor
+#NDWI_max	>= -0.1 &
+#NDWBI_max <= -0.1 &
+##WGI_max	>=0.25 &
+##WGI_mean	>=0.1 &
+#WGI_min	>=0 & # good predictor
+#slope	<5 &
+##blue	>1000 &
+#green	>1000 
+##red	>1500 
+nir	>2650 # very good predictor
+##swir1	>2500 
+
+table(dfs$lc[iTrees]) 
+#3    7    8 
+#9 6721   69 
+
+
+# LDA summer
+
+library(MASS)
+library(ROCR)
+
+smp_size_raw <- floor(0.75 * nrow(dfs))
+train_ind_raw <- sample(nrow(dfs), size = smp_size_raw)
+
+train_raw.df <- dfs[train_ind_raw, ]
+test_raw.df <- dfs[-train_ind_raw, ]
+
+#f <- paste(names(train_raw.df)[28], "~", paste(names(train_raw.df)[-c(1,2,28)], collapse=" + "))
+f <- paste("as.factor(train_raw.df$lc) ~ ", paste(names(train_raw.df)[-c(1,2,28)], collapse=" + "))
+wdbc_raw.lda <- lda(as.formula(paste(f)), data = train_raw.df)
+
+wdbc_raw.lda.predict <- predict(wdbc_raw.lda, newdata = test_raw.df)
+
+wdbc_raw.lda.predict$class
+
+table(wdbc_raw.lda.predict$class,test_raw.df$lc)
+
+
+# Get the posteriors as a dataframe.
+wdbc_raw.lda.predict.posteriors <- as.data.frame(wdbc_raw.lda.predict$posterior)
+# Evaluate the model
+pred <- prediction(wdbc_raw.lda.predict.posteriors[,2], test_raw.df$lc)
+roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
+auc.train <- performance(pred, measure = "auc")
+auc.train <- auc.train@y.values
+# Plot
+plot(roc.perf)
+#abline(a=0, b= 1)
+#text(x = .25, y = .65 ,paste("AUC = ", round(auc.train[[1]],3), sep = ""))
 
