@@ -47,6 +47,7 @@ w96df<-rmv_outl(df96win)
 w01df<-rmv_outl(df01win)
 w09df<-rmv_outl(df09win)
 
+## only for plots
 df96sm<-melt(s96df, id=c('year','season','lc'),na.rm=T)
 df01sm<-melt(s01df, id=c('year','season','lc'),na.rm=T)
 df09sm<-melt(s09df, id=c('year','season','lc'),na.rm=T)
@@ -67,6 +68,8 @@ w01plot <- ggplot(df01wm, aes(as.factor(lc), value)) + geom_boxplot(aes(colour =
 ggsave('w01plot.png',w01plot,scale=2,width=16,height=8,uni='cm')
 w09plot <- ggplot(df09wm, aes(as.factor(lc), value)) + geom_boxplot(aes(colour = season)) + facet_wrap(vars(variable), scales = "free")
 ggsave('w09plot.png',w09plot,scale=2,width=16,height=8,uni='cm')
+## only for plots
+
 
 # summer thresholds
 
@@ -97,10 +100,16 @@ GCVI_min	>=0.98 & # very good predictor
 nir	>2650 # very good predictor
 ##swir1	>2500 
 
+iTreesalt<-
+WGI_min	>0 &
+NDWBI_mean < -0.28 &
+NDWBI_mean > -0.4 
+
 table(dfs$lc[iTrees]) 
 #3    7    8 
 #9 6721   69 
 
+table(dfs$lc[iTreesalt]) 
 
 # LDA summer
 
