@@ -136,7 +136,7 @@ table(summer.lda.predict$class,test.df$lc)
 # Get the posteriors as a dataframe.
 summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
 # Evaluate the model
-pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc)
+pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc) # Error: 'predictions' contains NA.
 roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
 auc.train <- performance(pred, measure = "auc")
 auc.train <- auc.train@y.values
@@ -144,4 +144,9 @@ auc.train <- auc.train@y.values
 plot(roc.perf)
 #abline(a=0, b= 1)
 #text(x = .25, y = .65 ,paste("AUC = ", round(auc.train[[1]],3), sep = ""))
+
+# MDS
+
+ddfs<-dist(dfs[1:50000,-c(1:2,28)])
+
 
