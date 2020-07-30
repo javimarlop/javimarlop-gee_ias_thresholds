@@ -71,12 +71,12 @@ ggsave('w09plot.png',w09plot,scale=2,width=16,height=8,uni='cm')
 ## only for plots
 
 
-# summer thresholds
+# summer thresholds OK
 
 dfs<-rbind(s96df,s01df,s09df)
 attach(dfs)
 
-iTrees<-
+isTrees<-
 ##GCVI_max	>=1.5 &
 ##GCVI_mean	>=1.25 &
 GCVI_min	>=0.98 & # very good predictor
@@ -100,16 +100,51 @@ GCVI_min	>=0.98 & # very good predictor
 nir	>2650 # very good predictor
 ##swir1	>2500 
 
-iTreesalt<-
-WGI_min	>0 &
-NDWBI_mean < -0.28 &
-NDWBI_mean > -0.4 
 
-table(dfs$lc[iTrees]) 
+table(dfs$lc[isTrees]) 
 #3    7    8 
 #9 6721   69 
 
-table(dfs$lc[iTreesalt]) 
+
+# winter thresholds (maybe not necessary?)
+
+dfw<-rbind(w96df,w01df,w09df)
+attach(dfw)
+
+iwTrees<-
+##GCVI_max	>2 &
+##GCVI_mean	>1.5 &
+##GCVI_min	> 1 &
+##GCVI_std > 0.5 &
+MTI     	> 3 & # ok
+NDBI_max	< -0.1 & # imp
+##NDBI_mean	< -0.1 &
+##NDBI_min	< -0.2 &
+##NDVI_max	> 0.6 &
+#NDVI_mean	...
+#NDVI_min	...
+#NDVI_std   ...
+#NDWBI_max  ...
+#NDWBI_mean ...
+#NDWBI_min  ...
+##NDWI_max	> 0.3 &
+#NDWI_mean  ...
+#NDWI_min   ...
+#NDWI_std   ...
+##WGI_max	> 1 &
+##WGI_mean	> 0.3 &
+#WGI_min	...
+WGI_std    > 0.18 # ok # 0.2
+#blue	    ...
+#green		...
+#nir		...
+#red		...
+#slope		...  
+##swir1		...
+
+table(dfw$lc[iwTrees]) 
+
+
 
 # LDA summer
 
