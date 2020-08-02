@@ -148,34 +148,34 @@ table(dfw$lc[iwTrees])
 # Crops summer thresholds 
 
 isCrops<-
-##GCVI_max	 &
+#GCVI_max	> 1.5 &
 ##GCVI_mean	 &
 ##GCVI_min	 &
-##GCVI_std  &
-#MTI  & 
-#NDBI_max	 & 
-##NDBI_mean	 &
-##NDBI_min	 &
-##NDVI_max	 &
-#NDVI_mean	...
-#NDVI_min	...
-#NDVI_std   ...
+#GCVI_std  > 0.3 &
+#MTI  > 3 & 
+#NDBI_max	> 0.05 & 
+NDBI_mean	 > 0 & #looks good to differenciate from iTress
+#NDBI_min	 > -0.05 &
+NDVI_max	 < 0.3 & #looks good to differenciate from iTress
+#NDVI_mean	< 0.25 &
+#NDVI_min	< 0.15 & 
+#NDVI_std   > 0.075 & #looks good to differenciate from iTress
 #NDWBI_max  ...
-#NDWBI_mean ...
+#NDWBI_mean < -0.35 & 
 #NDWBI_min  ...
 ##NDWI_max	 &
 #NDWI_mean  ...
 #NDWI_min   ...
-#NDWI_std   ...
+#NDWI_std   > 0.075 & 
 ##WGI_max	 &
 ##WGI_mean	 &
-#WGI_min	...
+WGI_min	< -0.05 & #looks good to differenciate from iTress
 #WGI_std     
 #blue	    ...
 #green		...
-#nir		...
+nir		> 2500  
 #red		...
-#slope		...  
+#slope		< 5 
 ##swir1		...
 
 table(dfs$lc[isCrops]) 
@@ -217,16 +217,23 @@ iwCrops<-
 table(dfs$lc[iwCrops]) 
 
 
+# https://sebastianraschka.com/Articles/2014_python_lda.html
 # LDA summer
 
 library(MASS)
 library(ROCR)
 
-smp_size <- floor(0.75 * nrow(dfs))
-train_ind <- sample(nrow(dfs), size = smp_size)
+dfs3cl<-dfs
+dfs3cl$lc[dfs3cl$lc!=7 | dfs3cl$lc!=8]<-9
 
-train.df <- dfs[train_ind, ]
-test.df <- dfs[-train_ind, ]
+ind78<-dfs$lc==7 | dfs$lc==8
+dfs78<-dfs[ind78,]
+
+smp_size <- floor(0.75 * nrow(dfs78))
+train_ind <- sample(nrow(dfs78), size = smp_size)
+
+train.df <- dfs78[train_ind, ]
+test.df <- dfs78[-train_ind, ]
 
 #f <- paste(names(train.df)[28], "~", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
 f <- paste("as.factor(train.df$lc) ~ ", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
@@ -239,7 +246,7 @@ summer.lda.predict$class
 table(summer.lda.predict$class,test.df$lc)
 
 
-# Get the posteriors as a dataframe.
+# Get the posteriors as a dataframe. # NA ERROR!
 summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
 # Evaluate the model
 pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc) # Error: 'predictions' contains NA.
