@@ -222,39 +222,72 @@ table(dfs$lc[iwCrops])
 
 library(MASS)
 library(ROCR)
+library(caret)
 
-dfs3cl<-dfs
-dfs3cl$lc[dfs3cl$lc!=7 | dfs3cl$lc!=8]<-9
-
-ind78<-dfs$lc==7 | dfs$lc==8
-dfs78<-dfs[ind78,]
-
-smp_size <- floor(0.75 * nrow(dfs78))
-train_ind <- sample(nrow(dfs78), size = smp_size)
-
-train.df <- dfs78[train_ind, ]
-test.df <- dfs78[-train_ind, ]
-
-#f <- paste(names(train.df)[28], "~", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
+# All clasess
+smp_size <- floor(0.75 * nrow(dfs))
+train_ind <- sample(nrow(dfs), size = smp_size)
+train.df <- dfs[train_ind, ]
+test.df <- dfs[-train_ind, ]
 f <- paste("as.factor(train.df$lc) ~ ", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
 summer.lda <- lda(as.formula(paste(f)), data = train.df)
-
 summer.lda.predict <- predict(summer.lda, newdata = test.df)
-
 summer.lda.predict$class
+confusionMatrix(table(summer.lda.predict$class,test.df$lc))
 
-table(summer.lda.predict$class,test.df$lc)
 
+dfs378<-dfs
+dfs23<-dfs
+ind78<-dfs$lc==7 | dfs$lc==8
+
+dfs78<-dfs[ind78,]
+dfs378$lc[!ind78]<-3
+
+dfs23$lc[!ind78]<-3
+dfs23$lc[ind78]<-2
+
+# Irrigated trees and crops
+smp_size78 <- floor(0.75 * nrow(dfs78))
+train_ind78 <- sample(nrow(dfs78), size = smp_size78)
+train78.df <- dfs78[train_ind78, ]
+test78.df <- dfs78[-train_ind78, ]
+f <- paste("as.factor(train78.df$lc) ~ ", paste(names(train78.df)[-c(1,2,28)], collapse=" + "))
+summer.lda78 <- lda(as.formula(paste(f)), data = train78.df)
+summer.lda78.predict <- predict(summer.lda78, newdata = test78.df)
+summer.lda78.predict$class
+confusionMatrix(table(summer.lda78.predict$class,test78.df$lc))
+
+# Irrigated trees and crops vs. the rest of the classes
+smp_size378 <- floor(0.75 * nrow(dfs378))
+train_ind378 <- sample(nrow(dfs378), size = smp_size378)
+train378.df <- dfs378[train_ind378, ]
+test378.df <- dfs378[-train_ind378, ]
+f <- paste("as.factor(train378.df$lc) ~ ", paste(names(train378.df)[-c(1,2,28)], collapse=" + "))
+summer.lda378 <- lda(as.formula(paste(f)), data = train378.df) # , na.action=na.exclude
+summer.lda378.predict <- predict(summer.lda378, newdata = test378.df)
+summer.lda378.predict$class
+confusionMatrix(table(summer.lda378.predict$class,test378.df$lc))
+
+# Merged Irrigated trees and crops (2) vs. the rest of the classes (3)
+smp_size23 <- floor(0.75 * nrow(dfs23))
+train_ind23 <- sample(nrow(dfs23), size = smp_size23)
+train23.df <- dfs23[train_ind23, ]
+test23.df <- dfs23[-train_ind23, ]
+f <- paste("as.factor(train23.df$lc) ~ ", paste(names(train23.df)[-c(1,2,28)], collapse=" + "))
+summer.lda23 <- lda(as.formula(paste(f)), data = train23.df) # , na.action=na.exclude
+summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
+summer.lda23.predict$class
+confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
 # Get the posteriors as a dataframe. # NA ERROR!
-summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
+#summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
 # Evaluate the model
-pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc) # Error: 'predictions' contains NA.
-roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
-auc.train <- performance(pred, measure = "auc")
-auc.train <- auc.train@y.values
+#pred <- prediction(summer.lda.predict.posteriors[,2], test.df$lc) # Error: 'predictions' contains NA.
+#roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
+#auc.train <- performance(pred, measure = "auc")
+#auc.train <- auc.train@y.values
 # Plot
-plot(roc.perf)
+#plot(roc.perf)
 #abline(a=0, b= 1)
 #text(x = .25, y = .65 ,paste("AUC = ", round(auc.train[[1]],3), sep = ""))
 
