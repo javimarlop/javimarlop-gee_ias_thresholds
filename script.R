@@ -13,11 +13,12 @@ library(reshape)
 library(ggplot2)
 
 df96sum<-read.table('sample_data_summer_1996.csv',header=T,sep=',')
-df96win<-read.table('sample_data_winter_1996.csv',header=T,sep=',')
-df01sum<-read.table('sample_data_summer_2001.csv',header=T,sep=',')
-df01win<-read.table('sample_data_winter_2001.csv',header=T,sep=',')
 df09sum<-read.table('sample_data_summer_2009.csv',header=T,sep=',')
+df01sum<-read.table('sample_data_summer_2001.csv',header=T,sep=',')
+
+df01win<-read.table('sample_data_winter_2001.csv',header=T,sep=',')
 df09win<-read.table('sample_data_winter_2009.csv',header=T,sep=',')
+df96win<-read.table('sample_data_winter_1996.csv',header=T,sep=',')
 
 
 rmv_outl<-function(table){ # this must be done by each lc class!
@@ -43,6 +44,7 @@ rmv_outl<-function(table){ # this must be done by each lc class!
 s96df<-rmv_outl(df96sum)
 s01df<-rmv_outl(df01sum)
 s09df<-rmv_outl(df09sum)
+
 w96df<-rmv_outl(df96win)
 w01df<-rmv_outl(df01win)
 w09df<-rmv_outl(df09win)
@@ -74,6 +76,7 @@ ggsave('w09plot.png',w09plot,scale=2,width=16,height=8,uni='cm')
 # Trees summer thresholds 
 
 dfs<-rbind(s96df,s01df,s09df)
+
 attach(dfs)
 
 isTrees<-
@@ -257,6 +260,9 @@ summer.lda78.predict <- predict(summer.lda78, newdata = test78.df)
 summer.lda78.predict$class
 confusionMatrix(table(summer.lda78.predict$class,test78.df$lc))
 
+diffs78<-abs(summer.lda78$means[1,]/summer.lda78$means[2,])
+diffs78[order(diffs78,decreasing=T)]
+
 # Irrigated trees and crops vs. the rest of the classes
 smp_size378 <- floor(0.75 * nrow(dfs378))
 train_ind378 <- sample(nrow(dfs378), size = smp_size378)
@@ -267,6 +273,7 @@ summer.lda378 <- lda(as.formula(paste(f)), data = train378.df) # , na.action=na.
 summer.lda378.predict <- predict(summer.lda378, newdata = test378.df)
 summer.lda378.predict$class
 confusionMatrix(table(summer.lda378.predict$class,test378.df$lc))
+
 
 # Merged Irrigated trees and crops (2) vs. the rest of the classes (3)
 smp_size23 <- floor(0.75 * nrow(dfs23))
@@ -279,8 +286,10 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
-diffs<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
-diffs[order(diffs,decreasing=T)]
+diffs23<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
+diffs23[order(diffs23,decreasing=T)]
+
+for(){}
 
 # Get the posteriors as a dataframe. # NA ERROR!
 #summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
@@ -293,6 +302,7 @@ diffs[order(diffs,decreasing=T)]
 #plot(roc.perf)
 #abline(a=0, b= 1)
 #text(x = .25, y = .65 ,paste("AUC = ", round(auc.train[[1]],3), sep = ""))
+
 
 # MDS
 
