@@ -286,10 +286,65 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
-diffs23<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
-diffs23[order(diffs23,decreasing=T)]
+decr<-order(abs(summer.lda23$scaling),decreasing=T)
+summer.lda23$means[,decr]
 
-for(){}
+#diffs23<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
+#diffs23<-abs(summer.lda23$means[1,]-summer.lda23$means[2,])
+
+diffs23<-NULL
+for(i in 1:dim(summer.lda23$means)[2]){
+	dv<-summer.lda23$means[,i]
+	#if(min(dv)<0){dv+abs(min(dv))}
+	x<-(dv[1]-dv[2])/mean(dv)
+	#x<-cv(dv)
+	diffs23[i]<-abs(x)
+	}
+
+diffs23[order(diffs23,decreasing=T)]
+summer.lda23$means[,order(diffs23,decreasing=T)]
+
+attach(dfs)
+
+ias<-
+##GCVI_max	 &
+##GCVI_mean	 &
+##GCVI_min	 &
+##GCVI_std  &
+#MTI  & 
+#NDBI_max	 & 
+#NDBI_mean	< -0.02253282 &
+#NDBI_min	< -0.10494539 &
+##NDVI_max	 &
+NDVI_mean	> 0.2673560 &
+#NDVI_min	...
+#NDVI_std   ...
+#NDWBI_max  ...
+NDWBI_mean < -0.3452431 &
+#NDWBI_min  ...
+#NDWI_max	> 0.10494539 &
+#NDWI_mean  > 0.02253282 &
+#NDWI_min   ...
+NDWI_std   > 0.05186614
+#WGI_max	> 0.228233120 &
+#WGI_mean	> 0.07429631 
+#WGI_min	> -0.01236259 &
+#WGI_std  > 0.08744740   
+#blue	    ...
+#green		...
+#nir		...
+#red		...
+#slope < 2.172271
+##swir1		...
+
+table(dfs$lc[ias]) 
+
+
+#diffs23[order(diffs23,decreasing=T)]
+
+#diffs23i<-diffs23
+#for(i in 1:length(diffs23)){if(diffs23[i]<1){diffs23i[i]<-1/#diffs23[i]}}
+#diffs23i[order(diffs23i,decreasing=T)]
 
 # Get the posteriors as a dataframe. # NA ERROR!
 #summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
