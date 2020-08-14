@@ -279,6 +279,9 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
+diffs<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
+diffs[order(diffs,decreasing=T)]
+
 # Get the posteriors as a dataframe. # NA ERROR!
 #summer.lda.predict.posteriors <- as.data.frame(summer.lda.predict$posterior)
 # Evaluate the model
