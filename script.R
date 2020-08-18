@@ -238,16 +238,22 @@ summer.lda.predict <- predict(summer.lda, newdata = test.df)
 summer.lda.predict$class
 confusionMatrix(table(summer.lda.predict$class,test.df$lc))
 
+dfy<-rbind(w96df,w01df,w09df,s96df,s01df,s09df)
 
 dfs378<-dfs
 dfs23<-dfs
 ind78<-dfs$lc==7 | dfs$lc==8
+ind7<-dfs$lc==7
+ind8<-dfs$lc==8
 
 dfs78<-dfs[ind78,]
 dfs378$lc[!ind78]<-3
 
 dfs23$lc[!ind78]<-3
 dfs23$lc[ind78]<-2
+
+dfs73<-dfs23[!ind8,]
+dfs83<-dfs23[!ind7,]
 
 # Irrigated trees and crops
 smp_size78 <- floor(0.75 * nrow(dfs78))
@@ -260,8 +266,8 @@ summer.lda78.predict <- predict(summer.lda78, newdata = test78.df)
 summer.lda78.predict$class
 confusionMatrix(table(summer.lda78.predict$class,test78.df$lc))
 
-diffs78<-abs(summer.lda78$means[1,]/summer.lda78$means[2,])
-diffs78[order(diffs78,decreasing=T)]
+#diffs78<-abs(summer.lda78$means[1,]/summer.lda78$means[2,])
+#diffs78[order(diffs78,decreasing=T)]
 
 # Irrigated trees and crops vs. the rest of the classes
 smp_size378 <- floor(0.75 * nrow(dfs378))
@@ -283,7 +289,7 @@ test23.df <- dfs23[-train_ind23, ]
 f <- paste("as.factor(train23.df$lc) ~ ", paste(names(train23.df)[-c(1,2,28)], collapse=" + "))
 summer.lda23 <- lda(as.formula(paste(f)), data = train23.df) # , na.action=na.exclude
 summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
-summer.lda23.predict$class
+#summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
 decr<-order(abs(summer.lda23$scaling),decreasing=T)
