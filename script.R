@@ -313,6 +313,7 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 #summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
+plot(summer.lda23)
 plot(factor(test23.df$lc),summer.lda23.predict$x)
 
 # Merged Irrigated trees (2) vs. the rest of the classes (3)
@@ -354,21 +355,20 @@ for(i in 1:dim(coef(summer.lda23))[1]){
 
 lda1<-NULL
 
-#apply(1,)
-
 for(j in 1:dim(dfspred)[1]){
 
-	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T) # the origin value only works for the 23 lda
+	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T) # the origin value only works for the 23 summer lda
 
 }
 
-hist(lda1)
-
+#hist(lda1)
+plot(factor(dfs$lc),lda1)
 table(dfspred$lc[lda1 < -1.5])
 
 #   2    3    4    5    6    7    8    9   10 
 #   2   10   61   24  205 6126 3119  526  180 
 
+#table(dfspred$lc[lda1 < 2.5]) # winter values!
 
 #decr<-order(abs(summer.lda23$scaling),decreasing=T)
 #summer.lda23$means[,decr]
