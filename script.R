@@ -1,3 +1,6 @@
+# GNU General Public License v3.0
+# Author: Javier Martínez-López
+
 #1: 'natural trees',
 #2: 'open trees',
 #3: 'dense scrub',
@@ -183,6 +186,10 @@ nir		> 2500
 
 table(dfs$lc[isCrops]) 
 
+#    2     3     4     5     6     7     8     9    10 
+#  280  4526  5420 10242  9927  1006  5149  2205  5489 
+
+
 
 # Crops winter thresholds 
 
@@ -235,8 +242,15 @@ test.df <- dfs[-train_ind, ]
 f <- paste("as.factor(train.df$lc) ~ ", paste(names(train.df)[-c(1,2,28)], collapse=" + "))
 summer.lda <- lda(as.formula(paste(f)), data = train.df)
 summer.lda.predict <- predict(summer.lda, newdata = test.df)
-summer.lda.predict$class
+#summer.lda.predict$class
 confusionMatrix(table(summer.lda.predict$class,test.df$lc))
+
+plot(summer.lda.predict$x[,1],summer.lda.predict$x[,2],type='n')
+text(summer.lda.predict$x[,1],summer.lda.predict$x[,2],lab=test.df$lc,col=test.df$lc)
+#text(summer.lda.predict$x[,1],summer.lda.predict$x[,2],lab=summer.lda.predict$class)#,col=summer.lda.predict$class)
+
+plot(factor(test.df$lc),summer.lda.predict$x[,1])
+plot(factor(test.df$lc),summer.lda.predict$x[,2]) # very good for class 7
 
 dfy<-rbind(w96df,w01df,w09df,s96df,s01df,s09df)
 
@@ -263,8 +277,10 @@ test78.df <- dfs78[-train_ind78, ]
 f <- paste("as.factor(train78.df$lc) ~ ", paste(names(train78.df)[-c(1,2,28)], collapse=" + "))
 summer.lda78 <- lda(as.formula(paste(f)), data = train78.df)
 summer.lda78.predict <- predict(summer.lda78, newdata = test78.df)
-summer.lda78.predict$class
+#summer.lda78.predict$class
 confusionMatrix(table(summer.lda78.predict$class,test78.df$lc))
+
+plot(factor(test78.df$lc),summer.lda78.predict$x) # good to distinguish between class 7 and 8
 
 #diffs78<-abs(summer.lda78$means[1,]/summer.lda78$means[2,])
 #diffs78[order(diffs78,decreasing=T)]
@@ -277,9 +293,14 @@ test378.df <- dfs378[-train_ind378, ]
 f <- paste("as.factor(train378.df$lc) ~ ", paste(names(train378.df)[-c(1,2,28)], collapse=" + "))
 summer.lda378 <- lda(as.formula(paste(f)), data = train378.df) # , na.action=na.exclude
 summer.lda378.predict <- predict(summer.lda378, newdata = test378.df)
-summer.lda378.predict$class
+#summer.lda378.predict$class
 confusionMatrix(table(summer.lda378.predict$class,test378.df$lc))
 
+plot(summer.lda378.predict$x[,1],summer.lda378.predict$x[,2],type='n')
+text(summer.lda378.predict$x[,1],summer.lda378.predict$x[,2],lab=test378.df$lc,col=test378.df$lc)
+
+plot(factor(test378.df$lc),summer.lda378.predict$x[,1])
+plot(factor(test378.df$lc),summer.lda378.predict$x[,2])
 
 # Merged Irrigated trees and crops (2) vs. the rest of the classes (3)
 smp_size23 <- floor(0.75 * nrow(dfs23))
@@ -291,6 +312,35 @@ summer.lda23 <- lda(as.formula(paste(f)), data = train23.df) # , na.action=na.ex
 summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 #summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
+
+plot(factor(test23.df$lc),summer.lda23.predict$x)
+
+# Merged Irrigated trees (2) vs. the rest of the classes (3)
+smp_size73 <- floor(0.75 * nrow(dfs73))
+train_ind73 <- sample(nrow(dfs73), size = smp_size73)
+train73.df <- dfs73[train_ind73, ]
+test73.df <- dfs73[-train_ind73, ]
+f <- paste("as.factor(train73.df$lc) ~ ", paste(names(train73.df)[-c(1,2,28)], collapse=" + "))
+summer.lda73 <- lda(as.formula(paste(f)), data = train73.df) # , na.action=na.exclude
+summer.lda73.predict <- predict(summer.lda73, newdata = test73.df)
+#summer.lda73.predict$class
+confusionMatrix(table(summer.lda73.predict$class,test73.df$lc))
+
+plot(factor(test73.df$lc),summer.lda73.predict$x) # thrs lower than -4
+
+# Merged Irrigated crops (2) vs. the rest of the classes (3)
+smp_size83 <- floor(0.75 * nrow(dfs83))
+train_ind83 <- sample(nrow(dfs83), size = smp_size83)
+train83.df <- dfs83[train_ind83, ]
+test83.df <- dfs83[-train_ind83, ]
+f <- paste("as.factor(train83.df$lc) ~ ", paste(names(train83.df)[-c(1,2,28)], collapse=" + "))
+summer.lda83 <- lda(as.formula(paste(f)), data = train83.df) # , na.action=na.exclude
+summer.lda83.predict <- predict(summer.lda83, newdata = test83.df)
+#summer.lda83.predict$class
+confusionMatrix(table(summer.lda83.predict$class,test83.df$lc))
+
+plot(factor(test83.df$lc),summer.lda83.predict$x)
+
 
 # convert to a funtion to test 
 dfspred<-dfs#test23.df
@@ -308,13 +358,17 @@ lda1<-NULL
 
 for(j in 1:dim(dfspred)[1]){
 
-	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T)
+	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T) # the origin value only works for the 23 lda
 
 }
 
 hist(lda1)
 
 table(dfspred$lc[lda1 < -1.5])
+
+#   2    3    4    5    6    7    8    9   10 
+#   2   10   61   24  205 6126 3119  526  180 
+
 
 #decr<-order(abs(summer.lda23$scaling),decreasing=T)
 #summer.lda23$means[,decr]
