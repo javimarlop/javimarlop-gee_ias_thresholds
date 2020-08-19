@@ -292,8 +292,32 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 #summer.lda23.predict$class
 confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
-decr<-order(abs(summer.lda23$scaling),decreasing=T)
-summer.lda23$means[,decr]
+# convert to a funtion to test 
+dfspred<-dfs#test23.df
+
+for(i in 1:dim(coef(summer.lda23))[1]){
+
+	coln<-which(names(dfs)==rownames(coef(summer.lda23))[i])
+	dfspred[,coln]<-dfspred[,coln]*coef(summer.lda23)[i]
+	
+}
+
+lda1<-NULL
+
+#apply(1,)
+
+for(j in 1:dim(dfspred)[1]){
+
+	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T)
+
+}
+
+hist(lda1)
+
+table(dfspred$lc[lda1 < -1.5])
+
+#decr<-order(abs(summer.lda23$scaling),decreasing=T)
+#summer.lda23$means[,decr]
 
 #diffs23<-abs(summer.lda23$means[1,]/summer.lda23$means[2,])
 #diffs23<-abs(summer.lda23$means[1,]-summer.lda23$means[2,])
