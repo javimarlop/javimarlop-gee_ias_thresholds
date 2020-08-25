@@ -233,6 +233,8 @@ table(dfs$lc[iwCrops])
 library(MASS)
 library(ROCR)
 library(caret)
+library(mda)
+library(klaR)
 
 # All clasess
 smp_size <- floor(0.75 * nrow(dfs))
@@ -315,6 +317,26 @@ confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
 
 plot(summer.lda23)
 plot(factor(test23.df$lc),summer.lda23.predict$x)
+
+summer.mda23 <- mda(as.formula(paste(f)), data = train23.df)
+summer.mda23$confusion # correct of class 2: 7416 (Best!)
+
+summer.fda23 <- fda(as.formula(paste(f)), data = train23.df)
+summer.fda23$confusion # correct of class 2: 6877
+
+summer.lda23.predict2 <- predict(summer.lda23, newdata = train23.df)
+confusionMatrix(table(summer.lda23.predict2$class,train23.df$lc)) # correct of class 2: 6877
+
+ummer.rda23 <- rda(as.formula(paste(f)), data = train23.df)
+summer.rda23.predict <- predict(summer.rda23, newdata = test23.df)
+confusionMatrix(table(summer.rda23.predict$class,test23.df$lc)) # correct of class 2: 2338
+
+summer.qda23 <- qda(as.formula(paste(f)), data = train23.df) # ERROR
+
+#indna<-apply(train23.df,1,function(x) any(is.na(x)))
+#indna<-as.vector(indna)
+
+
 
 # Merged Irrigated trees (2) vs. the rest of the classes (3)
 smp_size73 <- floor(0.75 * nrow(dfs73))
