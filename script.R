@@ -305,6 +305,9 @@ plot(factor(test378.df$lc),summer.lda378.predict$x[,1])
 plot(factor(test378.df$lc),summer.lda378.predict$x[,2])
 
 # Merged Irrigated trees and crops (2) vs. the rest of the classes (3)
+
+set.seed(13) 
+
 smp_size23 <- floor(0.75 * nrow(dfs23))
 train_ind23 <- sample(nrow(dfs23), size = smp_size23)
 train23.df <- dfs23[train_ind23, ]
@@ -366,11 +369,14 @@ plot(factor(test83.df$lc),summer.lda83.predict$x)
 
 
 # convert to a funtion to test 
-dfspred<-dfs#test23.df
+
+head(summer.lda23.predict$x) - head(lda1) # 5.076223
+
+dfspred<- dfs # test23.df
 
 for(i in 1:dim(coef(summer.lda23))[1]){
 
-	coln<-which(names(dfs)==rownames(coef(summer.lda23))[i])
+	coln<-which(names(dfspred)==rownames(coef(summer.lda23))[i])
 	dfspred[,coln]<-dfspred[,coln]*coef(summer.lda23)[i]
 	
 }
@@ -379,7 +385,7 @@ lda1<-NULL
 
 for(j in 1:dim(dfspred)[1]){
 
-	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.016518 #,na.rm=T) # the origin value only works for the 23 summer lda
+	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.076223#+ 5.016518 #,na.rm=T) # the origin value only works for the 23 summer lda
 
 }
 
@@ -408,7 +414,7 @@ for(i in 1:dim(summer.lda23$means)[2]){
 	}
 
 diffs23[order(diffs23,decreasing=T)]
-summer.lda23$means[,order(diffs23,decreasing=T)]
+summer.lda23$means[,order(diffs23,decreasing=T)] # variables with higher difference first
 
 attach(dfs)
 
