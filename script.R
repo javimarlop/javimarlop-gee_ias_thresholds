@@ -372,7 +372,7 @@ plot(factor(test83.df$lc),summer.lda83.predict$x)
 
 head(summer.lda23.predict$x) - head(lda1) # 5.076223
 
-dfspred<- dfs # test23.df
+dfspred<- test23.df # dfs 
 
 for(i in 1:dim(coef(summer.lda23))[1]){
 
