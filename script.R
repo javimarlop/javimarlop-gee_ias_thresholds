@@ -330,7 +330,7 @@ summer.fda23$confusion # correct of class 2: 6877
 summer.lda23.predict2 <- predict(summer.lda23, newdata = train23.df)
 confusionMatrix(table(summer.lda23.predict2$class,train23.df$lc)) # correct of class 2: 6877
 
-ummer.rda23 <- rda(as.formula(paste(f)), data = train23.df)
+summer.rda23 <- rda(as.formula(paste(f)), data = train23.df)
 summer.rda23.predict <- predict(summer.rda23, newdata = test23.df)
 confusionMatrix(table(summer.rda23.predict$class,test23.df$lc)) # correct of class 2: 2338
 
@@ -370,7 +370,7 @@ plot(factor(test83.df$lc),summer.lda83.predict$x)
 
 # convert to a funtion to test 
 
-head(summer.lda23.predict$x) - head(lda1) # 5.076223
+head(summer.lda23.predict$x) - head(lda1) # 5.076223 summer # 1.003122 winter
 
 dfspred<- test23.df # dfs 
 
@@ -385,13 +385,13 @@ lda1<-NULL
 
 for(j in 1:dim(dfspred)[1]){
 
-	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) + 5.076223#+ 5.016518 #,na.rm=T) # the origin value only works for the 23 summer lda
+	lda1[j]<-sum(dfspred[j,-c(1,2,28)]) #+ 1.003122#+ 5.076223#+ 5.016518 #,na.rm=T) # the origin value only works for the 23 summer lda
 
 }
 
 #hist(lda1)
 plot(factor(dfs$lc),lda1)
-table(dfspred$lc[lda1 < -1.5])
+table(dfspred$lc[lda1 < -2])
 
 #   2    3    4    5    6    7    8    9   10 
 #   2   10   61   24  205 6126 3119  526  180 
