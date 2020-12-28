@@ -1,9 +1,9 @@
 library(MASS)
 library(caret)
 
-df96sum <- read.table("sample_data_summer_1996.csv", header = T, sep = ",")
-df09sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
-df01sum <- read.table("sample_data_summer_2001.csv", header = T, sep = ",")
+df96sum <- read.table("sample_data_summer.csv", header = T, sep = ",")
+#df09sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
+#df01sum <- read.table("sample_data_summer_2001.csv", header = T, sep = ",")
 
 rmv_outl<-function(table){ 
 	df<-table
@@ -21,12 +21,12 @@ rmv_outl<-function(table){
  return(df)
 }
 
-s96df <- rmv_outl(df96sum)
-s01df <- rmv_outl(df01sum)
-s09df <- rmv_outl(df09sum)
-dfs <- rbind(s96df, s01df, s09df)
+dfs <- rmv_outl(df96sum)
+#s01df <- rmv_outl(df01sum)
+#s09df <- rmv_outl(df09sum)
+#dfs <- rbind(s96df, s01df, s09df)
 dfs23 <- dfs
-ind78 <- dfs$lc == 7 | dfs$lc == 8
+ind78 <- dfs$lc == 7 #| dfs$lc == 8
 dfs23$lc[!ind78] <- 3
 dfs23$lc[ind78] <- 2
 
@@ -35,10 +35,10 @@ smp_size23 <- floor(0.75 * nrow(dfs23))
 train_ind23 <- sample(nrow(dfs23), size = smp_size23)
 train23.df <- dfs23[train_ind23, ]
 test23.df <- dfs23[-train_ind23, ]
-f <- paste("as.factor(train23.df$lc) ~ ", paste(names(train23.df)[-c(1, 2, 28)], collapse = " + "))
+f <- paste("as.factor(train23.df$lc) ~ ", paste(names(train23.df)[-c(1, 2, 28)], collapse = " + ")) # check columns!
 summer.lda23 <- lda(as.formula(paste(f)), data = train23.df)
 summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
-confusionMatrix(table(summer.lda23.predict$class,test23.df$lc))
+print(confusionMatrix(table(summer.lda23.predict$class,test23.df$lc)))
 
 # Identifying the intercept
 dfspred<- test23.df 
@@ -67,6 +67,12 @@ intercept<-unique(int0[ind])[1]
 print('LDA summer coefficients')
 print(coefficients(summer.lda23))
 print(paste('The intercept is: ',intercept, sep=''))
+
+dict0<-as.data.frame(cbind(rownames(coefficients(summer.lda23)),as.numeric(coefficients(summer.lda23))))
+
+dict<-rbind(dict0,as.data.frame(rbind(c('intercept',intercept))))
+
+write.table(dict,'dict_sum.csv',sep=',',col.names=F,row.names=F,quote=F)
 
 # User decides based on plot
 # IAs are group 2
