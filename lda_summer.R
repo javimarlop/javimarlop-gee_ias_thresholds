@@ -1,7 +1,7 @@
 library(MASS)
 library(caret)
 
-df96sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
+df96sum <- read.table("sample_data_summer_2001.csv", header = T, sep = ",")
 #df09sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
 #df01sum <- read.table("sample_data_summer_2001.csv", header = T, sep = ",")
 
@@ -83,12 +83,14 @@ dict<-rbind(dict0,as.data.frame(rbind(c('intercept',intercept))))
 
 # User decides based on plot
 # IAs are group 2
-plot(summer.lda23)
+
+#plot(summer.lda23)
 
 # Allow to play with the value to test results
 #print(table(dfspred$lc[lda1 < -2]))
 
-### establish optimum threshold
+################# establish optimum threshold ######################
+# we assume overlapping histograms
 
 id2<-dfspred$lc==2
 id3<-dfspred$lc==3
@@ -98,16 +100,17 @@ mean3<-as.numeric(quantile(lda1ok[id3],na.rm=T)[3])
 
 wm<-which.max(c(mean2,mean3))
 
-init<-mean(c(mean2,mean3))
+#center<-mean(c(mean2,mean3))
 
-if(wm==2){end<-max(lda1ok[id3],na.rm=T)}
-if(wm==1){end<-min(lda1ok[id3],na.rm=T)}
+minval3<-min(lda1ok[id3],na.rm=T)
+maxval3<-max(lda1ok[id3],na.rm=T)
 
-candidates<-seq(init,end,0.01)
+candidates<-seq(minval3,maxval3,0.01)
 
 ratios<-NULL
 for(n in 1:length(candidates)){
-freq<-table(dfspred$lc[lda1ok>=candidates[n]])
+if(wm==2){freq<-table(dfspred$lc[lda1ok>=candidates[n]])}
+if(wm==1){freq<-table(dfspred$lc[lda1ok<=candidates[n]])}
 ratio<-freq[2]/freq[1]
 ratios[n]<-ratio
 }
@@ -116,18 +119,28 @@ ratios[n]<-ratio
 library(cpm)
 chpts<-processStream(na.omit(ratios),cpmType = "Exponential")
 
-wmc<-chpts$changePoints[length(chpts$changePoints)]
-#wmc<-which.max(ratios)
+wmax<-which.max(ratios)
+chpts0<-chpts$changePoints
+chptsfilt<-chpts0[chpts0<=wmax]
+
+#wmc<-chptsfilt[length(chptsfilt)]
+wmc<-round(as.numeric(quantile(chptsfilt)[4]))
+
+#wmc<-which.max(ratios) # too restrictive
 #wmc<-which(ratios==ratios[ratios>200][1])
 
-dev.new()
-plot(ratios,type='l')
-abline(v=wmc,col=2)
+#dev.new()
+#plot(ratios,type='l')
+#abline(v=wmc,col=2)
 
 opt<-candidates[wmc]
 print(opt)
 print(ratios[wmc])
 print(table(dfspred$lc[lda1ok>=candidates[wmc]]))
 
+library(ggplot2)
+dfh<-as.data.frame(cbind(dfspred$lc,lda1ok))
+ID<-round(seq(min(lda1ok,na.rm=T),max(lda1ok,na.rm=T),0.5),1)
+ggplot(dfh, aes(x=lda1ok, fill=as.factor(V1))) + geom_histogram(position="identity", alpha = 0.5) + scale_x_continuous("ID", labels = as.character(ID), breaks = ID) + geom_vline(xintercept=opt)
 
 
