@@ -1,7 +1,7 @@
 library(MASS)
 library(caret)
 
-df96sum <- read.table("sample_data_summer.csv", header = T, sep = ",")
+df96sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
 #df09sum <- read.table("sample_data_summer_2009.csv", header = T, sep = ",")
 #df01sum <- read.table("sample_data_summer_2001.csv", header = T, sep = ",")
 
@@ -41,7 +41,12 @@ summer.lda23.predict <- predict(summer.lda23, newdata = test23.df)
 print(confusionMatrix(table(summer.lda23.predict$class,test23.df$lc)))
 
 # Identifying the intercept
-dfspred<- test23.df 
+
+dfspred<- dfs23
+#dfspred<- train23.df
+#dfspred<- test23.df 
+
+pred<-predict(summer.lda23, newdata = dfspred)
 
 for(i in 1:dim(coef(summer.lda23))[1]){
 
@@ -59,9 +64,11 @@ for(j in 1:dim(dfspred)[1]){
 }
 
 # Extracting the intercept
-int0<-summer.lda23.predict$x - lda1
+int0<-pred$x - lda1
 ind<-!is.na(int0)
 intercept<-unique(int0[ind])[1]
+
+lda1ok<-lda1 + intercept
 
 # if we export that to a csv/json, can we use it later on directly?
 print('LDA summer coefficients')
@@ -72,12 +79,55 @@ dict0<-as.data.frame(cbind(rownames(coefficients(summer.lda23)),as.numeric(coeff
 
 dict<-rbind(dict0,as.data.frame(rbind(c('intercept',intercept))))
 
-write.table(dict,'dict_sum.csv',sep=',',col.names=F,row.names=F,quote=F)
+#write.table(dict,'dict_sum.csv',sep=',',col.names=F,row.names=F,quote=F)
 
 # User decides based on plot
 # IAs are group 2
 plot(summer.lda23)
 
 # Allow to play with the value to test results
-print(table(dfspred$lc[lda1 < -2]))
+#print(table(dfspred$lc[lda1 < -2]))
+
+### establish optimum threshold
+
+id2<-dfspred$lc==2
+id3<-dfspred$lc==3
+
+mean2<-as.numeric(quantile(lda1ok[id2],na.rm=T)[3])
+mean3<-as.numeric(quantile(lda1ok[id3],na.rm=T)[3])
+
+wm<-which.max(c(mean2,mean3))
+
+init<-mean(c(mean2,mean3))
+
+if(wm==2){end<-max(lda1ok[id3],na.rm=T)}
+if(wm==1){end<-min(lda1ok[id3],na.rm=T)}
+
+candidates<-seq(init,end,0.01)
+
+ratios<-NULL
+for(n in 1:length(candidates)){
+freq<-table(dfspred$lc[lda1ok>=candidates[n]])
+ratio<-freq[2]/freq[1]
+ratios[n]<-ratio
+}
+
+# https://lindeloev.github.io/mcp/articles/packages.html
+library(cpm)
+chpts<-processStream(na.omit(ratios),cpmType = "Exponential")
+
+wmc<-chpts$changePoints[length(chpts$changePoints)]
+#wmc<-which.max(ratios)
+#wmc<-which(ratios==ratios[ratios>200][1])
+
+dev.new()
+plot(ratios,type='l')
+abline(v=wmc,col=2)
+
+opt<-candidates[wmc]
+print(opt)
+print(ratios[wmc])
+print(table(dfspred$lc[lda1ok>=candidates[wmc]]))
+
+
 
